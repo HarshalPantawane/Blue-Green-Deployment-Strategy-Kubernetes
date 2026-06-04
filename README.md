@@ -32,21 +32,21 @@ to provision AWS resources, container orchastration using Kubernetes (AWS EKS), 
    Using User Credential
 
 2. **Clone The Repository**:
-   '''bash
+   ```bash
    git clone https://github.com/HarshalPantawane/Blue-Green-Deployment-Strategy-Kubernetes.git
    cd Blue-Green-Deployment-Strategy-Kubernetes
-   '''
+   ```
 3. **Provision Infrastructure**:
    Navigate to the terraform directory and deploy the infrastructure.
-   '''bash
+   ```bash
    cd terraform/
    terraform init
    terraform plan
    terrafrom apply
-   '''
+   ```
 
 4. **Creating Docker Images**:
-   '''bash
+   ```bash
    ### Build Backend Image:
    docker build -t backend_app_img .
    
@@ -61,18 +61,19 @@ to provision AWS resources, container orchastration using Kubernetes (AWS EKS), 
 
    docker tag frontend_app_img:latest 890871562773.dkr.ecr.us-east-1.amazonaws.com/frontend_app_img:latest
    docker push 890871562773.dkr.ecr.us-east-1.amazonaws.com/fronnted_app_img:latest
-   '''
+   ```
 
 5. **Configure Kubernetes**:
-   '''bash
+   ```bash
    aws eks update-kubernetes --region us-east-1 -- name prod-food-delivery-cluster
-   '''
+   ```
 
 6. **Initial Deployment**:
    Apply the initil baseline "Blue" environment kubernetes manifests manually.
-   '''bash
+   ```bash
    kubectl apply -f k8s/base/
    kubectl apply -f k8s/blue/
+   ```
 
 7. **Configure Jenkins CI/CD**:
    - Add the "Jenkinsfile" to your jenkins job.
@@ -85,7 +86,7 @@ which are triggered by the Jenkins CI/CD pipeline.
 - **Deploying a New version**: When code is pushed or a Jenkins job  is triggered, the pipeline builds the New Docker images and deploys them to the inactive environment (e.g., The Green environment).
 - **Traffic Switching**: Once the new environment passes its heath checks, the kubernetes Service selector is patched automatically  to route traffic to the newly deployed version.
 - **Rollbacks**: If an issue is detected post-deployment, run the "rollback.sh" script to immediately patch the service back to the previous stable environment.
-- 
+ 
 
 
 
