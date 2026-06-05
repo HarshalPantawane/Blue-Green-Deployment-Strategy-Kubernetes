@@ -87,22 +87,6 @@ which are triggered by the Jenkins CI/CD pipeline.
 - **Traffic Switching**: Once the new environment passes its heath checks, the kubernetes Service selector is patched automatically  to route traffic to the newly deployed version.
 - **Rollbacks**: If an issue is detected post-deployment, run the "rollback.sh" script to immediately patch the service back to the previous stable environment.
  
-### Project Structure
-```text
-Blue-Green-Deployment-Strategy-Kubernetes/
-|-- app
-|    |--backend
-|    |  |-- Dockerfile
-|    |  |-- package.json
-|    |  └── server.js
-|    |
-|    |-- frontend
-|    |   |-- src
-|    |   |    |-- Components
-
-Dockerfile
-Index.html
-package.json
 
 
 
