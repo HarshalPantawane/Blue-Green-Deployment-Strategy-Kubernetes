@@ -29,6 +29,14 @@ module "vpc" {
   environment          = var.environment
 }
 
+module "sg" {
+  source = "./sg"
+
+  environment = var.environment
+  vpc_id      = module.vpc.vpc_id
+  vpc_cidr    = var.vpc_cidr
+  
+}
 module "iam" {
   source = "./iam"
   environment = var.environment
@@ -37,8 +45,8 @@ module "iam" {
 module "eks" {
   source = "./eks"
 
-  cluster_name    = "${var.environment}-food-delivery-cluster"
-  cluster_version = "1.34"
+  cluster_name    = var.eks_cluster_name
+  cluster_version = var.eks_cluster_version
   vpc_id          = module.vpc.vpc_id
   subnet_ids      = module.vpc.private_subnet_ids
   environment     = var.environment
@@ -51,7 +59,7 @@ module "s3" {
   source = "./s3"
   
   environment = var.environment
-  bucket_name = "${var.environment}-food-delivery-artifacts"
+  bucket_name = var.s3_bucket_name
 }
 
 module "rds" {
