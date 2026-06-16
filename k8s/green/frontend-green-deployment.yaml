@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-green
+  namespace: production
+  labels:
+    app: frontend
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+      version: green
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: green
+    spec:
+      containers:
+        - name: frontend-app
+          image: 890871562773.dkr.ecr.us-east-1.amazonaws.com/delivery_frontend_img
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+          startupProbe:
+            httpGet:
+              path: /
+              port: 80
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: frontend-nginx-config

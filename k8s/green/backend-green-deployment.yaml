@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-green
+  namespace: production
+  labels:
+    app: backend
+    version: green
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+      version: green
+  template:
+    metadata:
+      labels:
+        app: backend
+        version: green
+    spec:
+      containers:
+        - name: food-delivery-app
+          image: 890871562773.dkr.ecr.us-east-1.amazonaws.com/delivery_backend_img
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: food-delivery-config
+            - secretRef:
+                name: food-delivery-secrets
+          env:
+            - name: APP_VERSION
+              value: "green"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10

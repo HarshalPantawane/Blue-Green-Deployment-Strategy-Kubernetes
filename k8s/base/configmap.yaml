@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: food-delivery-config
+  namespace: production
+data:
+  DB_HOST: "prod-food-delivery-db.c0zo80i8cyz3.us-east-1.rds.amazonaws.com"
+  DB_USER: "admin"
+  DB_NAME: "fooddelivery"

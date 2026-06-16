@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: production
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+    version: blue # This is the active version. CI/CD scripts will update this selector.
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
