@@ -10,6 +10,10 @@ output "public_subnet_ids" {
   value = aws_subnet.public[*].id
 }
 
+output "database_subnet_ids" {
+  value = aws_subnet.database[*].id
+}
+
 output "vpc_cidr" {
   value = aws_vpc.main.cidr_block
-} 
+}

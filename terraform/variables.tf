@@ -25,18 +25,6 @@ variable "availability_zones" {
   type    = list(string)
 }
 
-variable "db_name" {
-  type    = string
-}
-
-variable "db_username" {
-  type    = string
-}
-
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
 
 variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
@@ -52,3 +40,19 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket for artifacts"
   type        = string
 }
+
+variable "db_username" {
+  description = "DB username"
+  type = string
+}
+
+variable "db_passwd" {
+  description = "DB passwd"
+  type = string
+}
+
+variable "database_subnet_cidrs" {
+  description = "CIDR blocks for private database subnets"
+  type        = list(string)
+}
+

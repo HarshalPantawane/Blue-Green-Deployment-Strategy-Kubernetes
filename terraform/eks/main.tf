@@ -93,13 +93,4 @@ resource "aws_iam_role_policy_attachment" "ssm_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
   role       = aws_iam_role.eks_node_role.name
 }
-
-data "aws_security_group" "eks_nodes" {
-  filter {
-    name   = "group-name"
-    values = ["*eks-cluster-sg*"]
-  }
-  vpc_id = var.vpc_id
-  depends_on = [aws_eks_node_group.main]
-}
  
