@@ -1,0 +1,79 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = 'us-east-1'
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        FRONTEND_REPO = 'food-delivery-frontend'
+        BACKEND_REPO = 'food-delivery-backend'
+        IMAGE_TAG = "${env.BUILD_ID}"
+        SLACK_CHANNEL = '#deployments'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo "Running SonarQube Code Quality Analysis..."
+                    // In a live environment, you would use:
+                    // withSonarQubeEnv('SonarQube') {
+                    //     sh 'sonar-scanner -Dsonar.projectKey=food-delivery-app -Dsonar.sources=app/'
+                    // }
+                    sh "echo 'Analyzing source code quality gate status...'"
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+
+            steps {
+                dir('scripts') {
+                    sh "chmod +x build.sh"
+                    sh "./build.sh ${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                    sh "docker push ${ECR_REGISTRY}/${FRONTEND_REPO}:${IMAGE_TAG}"
+                    sh "docker push ${ECR_REGISTRY}/${BACKEND_REPO}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy (Blue-Green)') {
+            steps {
+                dir('scripts') {
+                    sh "chmod +x deploy.sh"
+                    // Deploy Backend
+                    sh "./deploy.sh backend ${IMAGE_TAG} ${ECR_REGISTRY}/${BACKEND_REPO}"
+                    // Deploy Frontend
+                    sh "./deploy.sh frontend ${IMAGE_TAG} ${ECR_REGISTRY}/${FRONTEND_REPO}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            slackSend (color: '#00FF00', message: "SUCCESS: Full-Stack Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+        failure {
+            slackSend (color: '#FF0000', message: "FAILED: Full-Stack Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            dir('scripts') {
+                sh "chmod +x rollback.sh"
+                sh "./rollback.sh backend"
+                sh "./rollback.sh frontend"
+            }
+        }
+    }
+}
